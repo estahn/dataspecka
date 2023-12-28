@@ -13,10 +13,10 @@ services:
             - '/volume1/docker/radarr:/config'
             - '/volume1/eggface:/data'
         restart: always
-        image: ghcr.io/linuxserver/radarr
+        image: ghcr.io/linuxserver/radarr:5.2.6
 
     sonarr:
-      image: lscr.io/linuxserver/sonarr:latest
+      image: ghcr.io/linuxserver/sonarr:3.0.10
       container_name: sonarr
       environment:
         - PUID=1033
@@ -29,7 +29,7 @@ services:
         - 8989:8989
 
     sabnzbd:
-      image: ghcr.io/linuxserver/sabnzbd
+      image: ghcr.io/linuxserver/sabnzbd:4.1.0
       container_name: sabnzbd
       environment:
         - PUID=1033
@@ -43,7 +43,7 @@ services:
         - 9090:9090
 
     plextraktsync:
-      image: ghcr.io/taxel/plextraktsync
+      image: ghcr.io/taxel/plextraktsync:0.27.13
       command: sync
       container_name: plextraktsync
       restart: on-failure:2
