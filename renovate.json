@@ -3,6 +3,11 @@
   "extends": [
     "config:recommended"
   ],
+  "packageRules": [
+    {
+      "automerge": true
+    }
+  ],
   "lockFileMaintenance": {
     "enabled": true,
     "automerge": true
