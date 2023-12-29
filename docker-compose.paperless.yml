@@ -70,7 +70,7 @@ services:
 
   tika:
     container_name: paperless-tika
-    image: apache/tika:2.7.0.0-full
+    image: apache/tika:2.9.1.0-full
     restart: unless-stopped
 
 volumes:
