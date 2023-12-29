@@ -1,0 +1,96 @@
+version: "3.6"
+services:
+  broker:
+    container_name: paperless-redis
+    image: redis:6.2
+    restart: unless-stopped
+    volumes:
+      - /volume1/docker/paperless/redis:/redis
+
+  db:
+    container_name: paperless-db
+    image: postgres:14
+    restart: unless-stopped
+    volumes:
+      - /volume1/docker/paperless/db:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: paperless
+      POSTGRES_USER: paperless
+      POSTGRES_PASSWORD: 64ee303d22f5bbbd46285b7b97
+
+  webserver:
+    container_name: paperless
+    image: ghcr.io/paperless-ngx/paperless-ngx:1.15.1
+    restart: unless-stopped
+    depends_on:
+      - db
+      - broker
+    ports:
+      - 8777:8000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - paperless_data:/usr/src/paperless/data
+      - paperless_media:/usr/src/paperless/media
+      - paperless_export:/usr/src/paperless/export
+      - paperless_consume:/usr/src/paperless/consume
+    environment:
+      PAPERLESS_REDIS: redis://broker:6379
+      PAPERLESS_DBHOST: db
+      PAPERLESS_DBPASS: 64ee303d22f5bbbd46285b7b97
+      USERMAP_UID: 1031
+      USERMAP_GID: 65541
+      PAPERLESS_TIME_ZONE: Europe/Berlin
+      PAPERLESS_OCR_LANGUAGE: deu+eng
+      PAPERLESS_OCR_LANGUAGES: eng deu
+      PAPERLESS_SECRET_KEY: C3Q2dLkVPqZWDKTXgkHwWhJ6jk8XqAfwefw3535l6pTGQXqJFqEkS9umFmXrk4WmzT8rlwjqWan6A2G54Q5IgraBv96CS
+      PAPERLESS_FILENAME_FORMAT: "{created_year}/{correspondent}/{title}"
+      PAPERLESS_TIKA_ENABLED: 1
+      PAPERLESS_TIKA_GOTENBERG_ENDPOINT: http://gotenberg:3000/forms/libreoffice/convert#
+      PAPERLESS_TIKA_ENDPOINT: http://tika:9998
+      PAPERLESS_ADMIN_USER: admin
+      PAPERLESS_ADMIN_PASSWORD: admin
+      PAPERLESS_CONSUMER_DELETE_DUPLICATES: true
+      PAPERLESS_DEBUG: false
+      PAPERLESS_TASK_WORKERS: 1
+      PAPERLESS_CONSUMER_POLLING: 60
+      PAPERLESS_CONSUMER_ENABLE_BARCODES: true
+
+  gotenberg:
+    container_name: paperless-gotenberg
+    image: gotenberg/gotenberg:7.8.3
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+    environment:
+      CHROMIUM_DISABLE_ROUTES: 1
+
+  tika:
+    container_name: paperless-tika
+    image: apache/tika:2.7.0.0-full
+    restart: unless-stopped
+
+volumes:
+  paperless_consume:
+    driver_opts:
+      type: "nfs"
+      o: "addr=127.0.0.1,rw,noatime,rsize=8192,wsize=8192,tcp,timeo=14,nfsvers=4"
+      device: ":/volume1/docker/paperless/consume"
+  paperless_media:
+    driver_opts:
+      type: "nfs"
+      o: "addr=127.0.0.1,rw,noatime,rsize=8192,wsize=8192,tcp,timeo=14,nfsvers=4"
+      device: ":/volume1/docker/paperless/media"
+  paperless_export:
+    driver_opts:
+      type: "nfs"
+      o: "addr=127.0.0.1,rw,noatime,rsize=8192,wsize=8192,tcp,timeo=14,nfsvers=4"
+      device: ":/volume1/docker/paperless/export"
+  paperless_data:
+    driver_opts:
+      type: "nfs"
+      o: "addr=127.0.0.1,rw,noatime,rsize=8192,wsize=8192,tcp,timeo=14,nfsvers=4"
+      device: ":/volume1/docker/paperless/data"
