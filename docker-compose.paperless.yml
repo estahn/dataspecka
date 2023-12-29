@@ -9,7 +9,7 @@ services:
 
   db:
     container_name: paperless-db
-    image: postgres:14
+    image: postgres:16
     restart: unless-stopped
     volumes:
       - /volume1/docker/paperless/db:/var/lib/postgresql/data
