@@ -29,7 +29,7 @@ services:
         - 8989:8989
 
     sabnzbd:
-      image: ghcr.io/linuxserver/sabnzbd:4.2.0
+      image: ghcr.io/linuxserver/sabnzbd:4.2.1
       container_name: sabnzbd
       environment:
         - PUID=1033
